@@ -1,5 +1,7 @@
 package com.secure.snap;
 
+import net.steppschuh.markdowngenerator.table.Table;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -47,13 +49,12 @@ public class AlgorithmPerformanceTester {
         }
 
         // Output algorithm performances
-        System.out.println("# Algorithm performances:\n");
+        Table.Builder table = new Table.Builder().withAlignments(Table.ALIGN_LEFT, Table.ALIGN_LEFT, Table.ALIGN_LEFT)
+                .addRow("Algorithm", "Average Encryption time (milliseconds)", "Average Decryption time (milliseconds)");
         for (GenericSecureSnap snap : secureSnaps) {
-            System.out.println("## Algorithm: " + snap.getAlgorithm());
-            System.out.println("Average Encryption time (milliseconds): " + avgEncryptionTimes.get(snap));
-            System.out.println("Average Decryption time (milliseconds): " + avgDecryptionTimes.get(snap));
-            System.out.println();
+            table.addRow(snap.getAlgorithm(), avgEncryptionTimes.get(snap).toString(), avgDecryptionTimes.get(snap).toString());
         }
+        System.out.println(table.build());
     }
 
     public static long testEncryptionTime(GenericSecureSnap snap, List<String> files) throws Exception {
@@ -72,7 +73,6 @@ public class AlgorithmPerformanceTester {
         for (String file : files) {
             long startTime = System.currentTimeMillis();
             String extension = file.substring(file.lastIndexOf('.'));
-            System.out.println(file.replace(".enc", "_decrypted" + extension));
             snap.decrypt(file + ".enc", file.replace(extension, "_decrypted" + extension));
             long endTime = System.currentTimeMillis();
             totalDecryptionTime += (endTime - startTime);
