@@ -21,13 +21,16 @@ public class ShamirSecretSharing {
      */
     public static void main(String[] args) {
         String secretKey = "mySecretKey";
+        System.out.println( "Secret key:"+secretKey);
         List<BigInteger> shares = generateShares(secretKey.getBytes(), MINIMUM_SHARES, MINIMUM_SHARES);
         System.out.println("Shares generated:");
         printShares(shares);
-        // shares = shares.subList(0, 1); // Uncomment to test with fewer shares
-        // shares.sort(Comparator.naturalOrder()); // Uncomment to test with out-of-order shares
         byte[] reconstructedKey = reconstructSecret(shares, shares.size());
         System.out.println("Reconstructed secret key: " + new String(reconstructedKey));
+        // List<BigInteger> shares_incomplete = shares.subList(0, 2); // Uncomment to test with missing shares
+        // shares_incomplete.sort(Comparator.naturalOrder()); // Uncomment to test with out-of-order shares
+        // byte[] reconstructedKey_incomplete = reconstructSecret(shares_incomplete, shares.size()); // If any shares are missing or are out of order Shamir will fail
+        // System.out.println("Reconstructed secret key with missing or out of order shares: " + new String(reconstructedKey_incomplete));
     }
 
     /**
