@@ -36,7 +36,7 @@ public class AlgorithmPerformanceTester {
         filesToProcess.add("resources/image4.jpg");
         filesToProcess.add("resources/image5.jpg");
         filesToProcess.add("resources/image6.jpg");
-        filesToProcess.add("resources/image7.mp4");
+        filesToProcess.add("resources/image7.pdf");
         filesToProcess.add("resources/image8.gif");
 
         Map<GenericSecureSnap, Long> avgEncryptionTimes = new HashMap<>();
