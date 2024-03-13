@@ -132,25 +132,6 @@ public class SecureSnap implements GenericSecureSnap {
             }
         }
     }
-
-    /**
-     * Main method for encrypting and decrypting a sample file.
-     *
-     * @param args Command-line arguments (not used).
-     */
-    public static void main(String[] args) {
-        String path = "resources/";
-        try {
-            SecureSnap secureSnap = new SecureSnap();
-            secureSnap.encrypt(path + "image.png", path + "imageCyphered.enc");
-            System.out.println("File encrypted successfully.");
-
-            secureSnap.decrypt(path + "imageCyphered.enc", path + "imageDecyphered.png");
-            System.out.println("File decrypted successfully.");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 }
 
 

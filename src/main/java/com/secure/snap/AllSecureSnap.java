@@ -5,7 +5,11 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+/**
+ * Implementation of GenericSecureSnap for handling encryption and decryption using various algorithms and parameters.
+ */
 public class AllSecureSnap implements GenericSecureSnap {
+
     private final SecretKey key;
     private final String keyFilePath = "DESClave.ser";
     private String algorithm;
@@ -13,11 +17,15 @@ public class AllSecureSnap implements GenericSecureSnap {
     private String padding;
     private int keySize;
 
-    public String getAlgorithm() {
-        return algorithm + this.keySize + "/" + mode + "/" + padding;
-    }
-
-
+    /**
+     * Initializes the AllSecureSnap instance with the specified algorithm, mode, padding, and key size.
+     *
+     * @param algorithm The encryption algorithm to use.
+     * @param mode      The encryption mode to use.
+     * @param padding   The padding scheme to use.
+     * @param keySize   The size of the encryption key.
+     * @throws Exception If an error occurs during key generation or loading.
+     */
     public AllSecureSnap(String algorithm, String mode, String padding, int keySize) throws Exception {
         this.algorithm = algorithm;
         this.mode = mode;
@@ -34,18 +42,22 @@ public class AllSecureSnap implements GenericSecureSnap {
         }
     }
 
-    private void saveSecretKey() throws IOException {
-        try (ObjectOutputStream fileKey = new ObjectOutputStream(new FileOutputStream(keyFilePath))) {
-            fileKey.writeObject(key);
-        }
+    /**
+     * Retrieves the algorithm used for encryption and decryption.
+     *
+     * @return The encryption algorithm with its parameters.
+     */
+    public String getAlgorithm() {
+        return algorithm + this.keySize + "/" + mode + "/" + padding;
     }
 
-    private SecretKey loadSecretKey() throws IOException, ClassNotFoundException {
-        try (ObjectInputStream fileKey = new ObjectInputStream(new FileInputStream(keyFilePath))) {
-            return (SecretKey) fileKey.readObject();
-        }
-    }
-
+    /**
+     * Encrypts the input file and saves the encrypted data to the output file.
+     *
+     * @param inputFile  The path to the input file to be encrypted.
+     * @param outputFile The path to save the encrypted output.
+     * @throws Exception If an error occurs during encryption.
+     */
     public void encrypt(String inputFile, String outputFile) throws Exception {
         Cipher cipher = Cipher.getInstance(algorithm + "/" + mode + "/" + padding);
         cipher.init(Cipher.ENCRYPT_MODE, key);
@@ -61,6 +73,13 @@ public class AllSecureSnap implements GenericSecureSnap {
         }
     }
 
+    /**
+     * Decrypts the input file and saves the decrypted data to the output file.
+     *
+     * @param inputFile  The path to the input file to be decrypted.
+     * @param outputFile The path to save the decrypted output.
+     * @throws Exception If an error occurs during decryption.
+     */
     public void decrypt(String inputFile, String outputFile) throws Exception {
         Cipher cipher = Cipher.getInstance(algorithm + "/" + mode + "/" + padding);
         cipher.init(Cipher.DECRYPT_MODE, key);
@@ -76,18 +95,29 @@ public class AllSecureSnap implements GenericSecureSnap {
         }
     }
 
-    public static void main(String[] args) {
-        String path = "resources/";
-        try {
-            AllSecureSnap allSecureSnap = new AllSecureSnap("DESede", "ECB", "PKCS5Padding", 168);
-            allSecureSnap.encrypt(path + "image.png", path + "archivocifrado.png");
-            System.out.println("File encrypted successfully.");
+    /**
+     * Saves the generated secret key to a file.
+     *
+     * @throws IOException If an error occurs during file I/O.
+     */
+    private void saveSecretKey() throws IOException {
+        try (ObjectOutputStream fileKey = new ObjectOutputStream(new FileOutputStream(keyFilePath))) {
+            fileKey.writeObject(key);
+        }
+    }
 
-            allSecureSnap.decrypt(path + "archivocifrado.png", path + "archivosalida.png");
-            System.out.println("File decrypted successfully.");
-        } catch (Exception e) {
-            e.printStackTrace();
+    /**
+     * Loads the secret key from a file.
+     *
+     * @return The loaded secret key.
+     * @throws IOException            If an error occurs during file I/O.
+     * @throws ClassNotFoundException If the class of the serialized object cannot be found.
+     */
+    private SecretKey loadSecretKey() throws IOException, ClassNotFoundException {
+        try (ObjectInputStream fileKey = new ObjectInputStream(new FileInputStream(keyFilePath))) {
+            return (SecretKey) fileKey.readObject();
         }
     }
 }
+
 

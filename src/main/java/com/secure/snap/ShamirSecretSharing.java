@@ -2,61 +2,72 @@ package com.secure.snap;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
+/**
+ * Implementation of Shamir Secret Sharing algorithm to split and reconstruct a secret key.
+ */
 public class ShamirSecretSharing {
 
     private static final int PRIME_BIT_LENGTH = 512;
     private static final int MINIMUM_SHARES = 3;
+    private static final BigInteger PRIME = BigInteger.probablePrime(PRIME_BIT_LENGTH, new SecureRandom());
 
+    /**
+     * Main method to test splitting and reconstructing the secret key.
+     * @param args Command line arguments (not used).
+     */
     public static void main(String[] args) {
-        // Obtener la clave secreta como entrada
-        String secretKey = "miClaveSecreta";
-
-        // Compartir la clave secreta entre participantes
-        BigInteger[] shares = generateShares(secretKey.getBytes(), MINIMUM_SHARES, MINIMUM_SHARES);
-
-        // Simular la pérdida de algunas acciones
-        System.out.println("Acciones generadas:");
+        String secretKey = "mySecretKey";
+        List<BigInteger> shares = generateShares(secretKey.getBytes(), MINIMUM_SHARES, MINIMUM_SHARES);
+        System.out.println("Shares generated:");
         printShares(shares);
-
-        // Reconstruir la clave secreta utilizando el número mínimo de acciones requeridas
-        byte[] reconstructedKey = reconstructSecret(shares, MINIMUM_SHARES);
-
-        System.out.println("Clave secreta reconstruida: " + new String(reconstructedKey));
+        // shares = shares.subList(0, 1); // Uncomment to test with fewer shares
+        // shares.sort(Comparator.naturalOrder()); // Uncomment to test with out-of-order shares
+        byte[] reconstructedKey = reconstructSecret(shares, shares.size());
+        System.out.println("Reconstructed secret key: " + new String(reconstructedKey));
     }
 
-    private static BigInteger[] generateShares(byte[] secret, int totalShares, int threshold) {
+    /**
+     * Generates shares (parts) of a secret key to share among participants.
+     * @param secret The secret key to share.
+     * @param totalShares The total number of shares to generate.
+     * @param threshold The minimum number of shares required to reconstruct the secret key.
+     * @return List of generated shares.
+     */
+    private static List<BigInteger> generateShares(byte[] secret, int totalShares, int threshold) {
         SecureRandom random = new SecureRandom();
-        BigInteger prime = BigInteger.probablePrime(PRIME_BIT_LENGTH, random);
-
-        BigInteger[] coefficients = new BigInteger[threshold - 1];
-        for (int i = 0; i < threshold - 1; i++) {
-            coefficients[i] = new BigInteger(PRIME_BIT_LENGTH, random).mod(prime);
+        BigInteger[] coefficients = new BigInteger[threshold];
+        for (int i = 0; i < threshold; i++) {
+            coefficients[i] = new BigInteger(PRIME.bitLength(), random).mod(PRIME);
         }
 
-        BigInteger[] shares = new BigInteger[totalShares];
+        List<BigInteger> shares = new ArrayList<>();
         for (int i = 1; i <= totalShares; i++) {
             BigInteger x = BigInteger.valueOf(i);
             BigInteger share = new BigInteger(secret);
-
-            for (int j = 0; j < threshold - 1; j++) {
-                BigInteger term = coefficients[j].multiply(x.pow(j + 1)).mod(prime);
-                share = share.add(term).mod(prime);
+            for (int j = 1; j < threshold; j++) {
+                BigInteger term = coefficients[j].multiply(x.pow(j)).mod(PRIME);
+                share = share.add(term).mod(PRIME);
             }
-
-            shares[i - 1] = share;
+            shares.add(share);
         }
-
         return shares;
     }
 
-    private static byte[] reconstructSecret(BigInteger[] shares, int threshold) {
-        BigInteger prime = BigInteger.probablePrime(PRIME_BIT_LENGTH, new SecureRandom());
-
-        byte[] reconstructedSecret = new byte[shares[0].toByteArray().length];
+    /**
+     * Reconstructs the secret key from the given shares.
+     * @param shares List of shares.
+     * @param threshold The minimum number of shares required to reconstruct the secret key.
+     * @return The reconstructed secret key.
+     */
+    private static byte[] reconstructSecret(List<BigInteger> shares, int threshold) {
+        BigInteger secret = BigInteger.ZERO;
         for (int i = 0; i < threshold; i++) {
             BigInteger xi = BigInteger.valueOf(i + 1);
-            BigInteger yi = shares[i];
+            BigInteger yi = shares.get(i);
 
             BigInteger numerator = BigInteger.ONE;
             BigInteger denominator = BigInteger.ONE;
@@ -64,25 +75,27 @@ public class ShamirSecretSharing {
             for (int j = 0; j < threshold; j++) {
                 if (j != i) {
                     BigInteger xj = BigInteger.valueOf(j + 1);
-
-                    numerator = numerator.multiply(BigInteger.ZERO.subtract(xj)).mod(prime);
-                    denominator = denominator.multiply(xi.subtract(xj)).mod(prime);
+                    numerator = numerator.multiply(xj.negate()).mod(PRIME);
+                    denominator = denominator.multiply(xi.subtract(xj)).mod(PRIME);
                 }
             }
 
-            BigInteger term = yi.multiply(numerator).multiply(denominator.modInverse(prime)).mod(prime);
-            byte[] termBytes = term.toByteArray();
-            for (int k = 0; k < termBytes.length; k++) {
-                reconstructedSecret[k] ^= termBytes[k];
-            }
+            BigInteger term = yi.multiply(numerator).multiply(denominator.modInverse(PRIME)).mod(PRIME);
+            secret = secret.add(term).mod(PRIME);
         }
-
-        return reconstructedSecret;
+        return secret.toByteArray();
     }
 
-    private static void printShares(BigInteger[] shares) {
-        for (int i = 0; i < shares.length; i++) {
-            System.out.println("Acción " + (i + 1) + ": " + shares[i]);
+    /**
+     * Prints the generated shares to the console.
+     * @param shares List of shares.
+     */
+    private static void printShares(List<BigInteger> shares) {
+        for (int i = 0; i < shares.size(); i++) {
+            System.out.println("Share " + (i + 1) + ": " + shares.get(i));
         }
     }
 }
+
+
+
