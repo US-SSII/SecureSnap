@@ -111,7 +111,7 @@ public class AlgorithmPerformanceTester {
     public static long measureDecryptionTime(GenericSecureSnap snap, String file) throws Exception {
         String extension = file.substring(file.lastIndexOf('.'));
         long startTime = System.currentTimeMillis();
-        snap.decrypt(file + ".enc", file.replace(extension, "_decrypted" + extension));
+        snap.decrypt(file + ".enc", file.replace(extension, "_decrypted" + snap.getAlgorithm().replace("/", "_") + extension));
         long endTime = System.currentTimeMillis();
         return endTime - startTime;
     }
