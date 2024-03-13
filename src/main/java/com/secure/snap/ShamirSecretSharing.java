@@ -27,10 +27,16 @@ public class ShamirSecretSharing {
         printShares(shares);
         byte[] reconstructedKey = reconstructSecret(shares, shares.size());
         System.out.println("Reconstructed secret key: " + new String(reconstructedKey));
-        // List<BigInteger> shares_incomplete = shares.subList(0, 2); // Uncomment to test with missing shares
-        // shares_incomplete.sort(Comparator.naturalOrder()); // Uncomment to test with out-of-order shares
-        // byte[] reconstructedKey_incomplete = reconstructSecret(shares_incomplete, shares.size()); // If any shares are missing or are out of order Shamir will fail
-        // System.out.println("Reconstructed secret key with missing or out of order shares: " + new String(reconstructedKey_incomplete));
+
+        List<BigInteger> sharesIncomplete = shares.subList(0, 2); // Uncomment to test with missing shares
+        byte[] reconstructedKeyIncomplete = reconstructSecret(sharesIncomplete, shares.size()); // Uncomment to test with missing shares
+        System.out.println("Reconstructed secret key with missing shares: " + new String(reconstructedKeyIncomplete)); // Uncomment to test with missing shares
+
+        // List<BigInteger> sharesOutOfOrder=shares; // Uncomment to test with out-of-order shares
+        // sharesOutOfOrder.sort(Comparator.naturalOrder()); // Uncomment to test with out-of-order shares
+        // byte[] reconstructedKeyOutOfOrder = reconstructSecret(sharesOutOfOrder, shares.size()); // Uncomment to test with out-of-order shares
+        // System.out.println("Reconstructed secret key with out of order shares: " + new String(reconstructedKeyOutOfOrder)); // Uncomment to test with out-of-order shares
+
     }
 
     /**
