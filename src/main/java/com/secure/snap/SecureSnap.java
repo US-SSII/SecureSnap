@@ -13,10 +13,15 @@ import java.security.Security;
 /**
  * Class main.java.SecureSnap for encrypting and decrypting files using AES and GCM.
  */
-public class SecureSnap {
+public class SecureSnap implements GenericSecureSnap {
     private final SecretKey key;
     private final String keyFilePath = "keyfile.ser";
     private byte[] iv = new byte[12];
+
+    public String getAlgorithm() {
+        return "AES256/GCM/NoPadding/";
+    }
+
 
     /**
      * Constructor for the main.java.SecureSnap class.
