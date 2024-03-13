@@ -72,7 +72,8 @@ public class AlgorithmPerformanceTester {
         for (String file : files) {
             long startTime = System.currentTimeMillis();
             String extension = file.substring(file.lastIndexOf('.'));
-            snap.decrypt(file + ".enc", file.replace(".enc", "_decrypted" + extension));
+            System.out.println(file.replace(".enc", "_decrypted" + extension));
+            snap.decrypt(file + ".enc", file.replace(extension, "_decrypted" + extension));
             long endTime = System.currentTimeMillis();
             totalDecryptionTime += (endTime - startTime);
         }
